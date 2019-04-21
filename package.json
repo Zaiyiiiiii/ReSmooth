@@ -1,7 +1,7 @@
 {
   "name": "smooth",
   "productName": "Smooth",
-  "version": "Arrival",
+  "version": "0.0.1",
   "author": "Zaiyiiiii <hehe@zaiyii.wang>",
   "description": "Cure Netease",
   "license": "FCK",
@@ -22,7 +22,7 @@
   "dependencies": {
     "@babel/core": "^7.4.0",
     "NeteaseCloudMusicApi": "github:Binaryify/NeteaseCloudMusicApi",
-     "big-integer": "^1.6.43",
+    "big-integer": "^1.6.43",
     "cnpm": "^6.0.0",
     "howler": "^2.0.15",
     "localforage": "^1.7.2",

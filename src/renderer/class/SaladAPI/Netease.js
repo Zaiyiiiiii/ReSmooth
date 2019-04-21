@@ -4,6 +4,7 @@ import login_status from "NeteaseCloudMusicApi/module/login_status"
 import userPlaylist from "NeteaseCloudMusicApi/module/user_playlist"
 import playlistSongs from "NeteaseCloudMusicApi/module/playlist_detail"
 import songUrl from "NeteaseCloudMusicApi/module/song_url"
+import search from "NeteaseCloudMusicApi/module/search"
 
 
 export class Netease {
@@ -32,6 +33,17 @@ export class Netease {
         let result = await songUrl({ id: id, br: 999000, cookie: auth }, request)
         return result.body.data[0].url
         // return `https://music.163.com/song/media/outer/url?id=${id}.mp3`
+    }
+    async getLikes(auth) {
+
+    }
+    async searchForSongs(text) {
+        let result = await search({ keywords: text, type: 1, limit: 100, offset: 0 }, request)
+        console.log(result)
+        return result.body.result.songs.map(item => {
+            item.platform = "netease"
+            return item
+        })
     }
 }
 

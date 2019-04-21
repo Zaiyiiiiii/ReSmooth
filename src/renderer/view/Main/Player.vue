@@ -18,7 +18,7 @@
                 >
                     <div
                         class="player-playing-background"
-                        :style="{backgroundImage:`url(${$store.state.playing.currentPlaying.al.picUrl})`}"
+                        :style="{backgroundImage:`url(${$store.state.playing.currentPlaying.al?$store.state.playing.currentPlaying.al.picUrl:''})`}"
                     >
                         <div></div>
                     </div>
@@ -78,11 +78,20 @@
             class="player-main"
             v-if="!$store.state.playing.off"
         >
+            <!-- <input type="text"> -->
             <div class="player-tab">
                 <div
                     class="player-tab-line"
                     :style="{ right:((tabIndex>=0)?((3-tabIndex)*30+8):-100)+'px' }"
                 ></div>
+                <input
+                    type="text"
+                    class="player-search"
+                    v-model="filter"
+                    placeholder="⚲"
+                    @keydown.enter="$router.push(`/player/search?t=${$event.target.value}`);$store.commit('playing/setFilter','')"
+                >
+                <span style="flex:auto"></span>
                 <div
                     class="player-tab-item"
                     :class="{'player-tab-current':(item.name==$route.name)}"
@@ -142,6 +151,40 @@
         position: relative;
         /* background: rgba(128, 128, 255, 0.5) */
     }
+    .player-search {
+        width: 30px;
+        -webkit-app-region: no-drag;
+        border: none;
+        color: #ccc;
+        border: 1.5px solid currentColor;
+        border-image-source: linear-gradient(
+            transparent,
+            transparent 68%,
+            currentColor 68%,
+            currentColor
+        );
+        text-indent: 0.5em;
+        border-image-slice: 20;
+        outline: none;
+        line-height: 25px;
+        font-family: "思源黑体-瘦";
+        font-weight: 100;
+        font-size: 12px;
+        transition: all 0.3s;
+        position: relative;
+    }
+    .player-search::placeholder {
+        color: currentColor;
+        font-size: 20px;
+        transform: translateY(2px) rotateZ(-45deg);
+        transform-origin: center;
+    }
+    .player-search:focus,
+    .player-search:hover,
+    .player-search:not(:placeholder-shown) {
+        flex: 10 0 auto;
+        color: #000;
+    }
     .player-progress {
         width: 3px;
         height: 100%;
@@ -199,10 +242,11 @@
         z-index: 100;
     }
     .player-bar:hover > .player-minify {
-        opacity: 0.5;
+        opacity: 0.2;
     }
     .player-minify:hover {
         opacity: 1 !important;
+        background: #000;
     }
     .player-playing-background {
         position: absolute;
@@ -331,6 +375,14 @@
         computed: {
             tabIndex() {
                 return this.tabs.findIndex(item => item.name == this.$route.name)
+            },
+            filter: {
+                get() {
+                    return this.$store.state.playing.filter
+                },
+                set(value) {
+                    this.$store.commit("playing/setFilter", value)
+                }
             }
         },
         methods: {

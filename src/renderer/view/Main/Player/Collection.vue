@@ -120,24 +120,6 @@
         position: relative;
         flex-direction: column;
     }
-    /* .collection-currentlist {
-                                            position: relative;
-                                            height: 20px;
-                                            flex-shrink: 0;
-                                            z-index: 100;
-                                            font-family: "FZCuJinLJW";
-                                            font-size: 12px;
-                                            width: 8em;
-                                            -webkit-app-region: no-drag;
-                                            overflow: hidden;
-                                            white-space: nowrap;
-                                            text-overflow: ellipsis;
-                                            user-select: none;
-                                            top: 7px;
-                                            margin-left: 4px;
-                                            opacity: 0;
-                                            transition: opacity 0.3s;
-                                        } */
     .collection-currentlist-icon {
         -webkit-app-region: no-drag;
         background-size: contain;
@@ -150,9 +132,6 @@
         top: 1px;
         flex-shrink: 0;
     }
-    /* .collection-currentlist-icon:hover + .collection-currentlist {
-                                            opacity: 1;
-                                        } */
     .collection-songs {
         /* background: rgba(255, 0, 0, 0.5); */
         flex-grow: 1;
@@ -260,17 +239,18 @@
         flex-grow: 0;
     }
     .collection-playlist {
-        background: #fff;
+        background: rgba(255,255,255,0.95);
         position: absolute;
         bottom: 0;
         left: 0;
         height: 300px;
         width: 100%;
         -webkit-app-region: no-drag;
+        padding: 1em;
     }
     .collection-playlist-item {
         font-size: 12px;
-        font-family: "FZCuJinLJW";
+        /* font-family: "FZCuJinLJW"; */
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -301,10 +281,16 @@
                 return list ? list.name : "哦噢"
             },
             paginatedSongs() {
-                return this.currentPlaylist.slice((this.currentPage - 1) * 15, this.currentPage * 15)
+                return this.filteredPlaylist.slice((this.currentPage - 1) * 15, this.currentPage * 15)
             },
             totalPage() {
-                return Math.ceil(this.currentPlaylist.length / 15)
+                return Math.ceil(this.filteredPlaylist.length / 15)
+            },
+            filteredPlaylist(){
+                return this.currentPlaylist.filter((item)=>{
+                    let filter = this.$store.state.playing.filter.toLowerCase()
+                    return item.name.toLowerCase().indexOf(filter)!=-1
+                })
             }
         },
         watch: {
@@ -314,6 +300,9 @@
             },
             currentPage(to, from) {
                 this.pageDirction = (from > to ? "left" : "right")
+            },
+            filteredPlaylist(){
+                this.currentPage = 1
             }
             // currentPlaylistName() {
             //     if (this.$refs.playlistname) {

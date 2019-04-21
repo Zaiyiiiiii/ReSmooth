@@ -1,4 +1,5 @@
 import { Salad } from "../../class/SaladAPI/Salad"
+import store from 'localforage'
 
 // let worker = new PlayingWorker()
 // let audioCtx = new (window.AudioContext || window.webkitAudioContext)()
@@ -20,6 +21,7 @@ const state = {
     playmode: "random",
     currentPlaying: undefined,
     volume: initVolume,
+    filter: "",
     mute: false,
     off: false,
     playlist: [],
@@ -27,7 +29,8 @@ const state = {
     pause: undefined,
     mini: false,
     progress: 0,
-    duration: 0.1
+    duration: 0.1,
+    historyCount: 0
 }
 
 // getters
@@ -56,14 +59,33 @@ const actions = {
             state.player.src = undefined
         }
     },
-    saveToHistory() {
+    // 历史暂时没有和用户绑定，以何形式结合？有待商榷。
+    async getHistory() {
+        return await store.getItem("history")
+    },
+    saveToHistory({ commit }, song) {
+        store.getItem("history").then((result) => {
+            console.log(result)
+            let history = result || []
+            let date = new Date()
+            history = history.concat([{ id: date.getTime(), time: date, song: song }])
+            if (result) {
+                store.removeItem("history")
+            }
+            store.setItem("history", history).then(
+                () => {
+                    commit("setHistoryCount", history.length)
+                }
+            )
 
+        })
+        // store.setItem("history")
     },
     initPlayer({ commit, state, dispatch }) {
         let player = new Audio()
         player.volume = initVolume / maxVolume
-        player.onended = () => {
-            dispatch("saveToHistory")
+        player.onended = async () => {
+            dispatch("saveToHistory", state.currentPlaying)
             dispatch("nextSong")
         }
         player.ontimeupdate = (event) => {
@@ -96,6 +118,12 @@ const actions = {
 
 // mutations
 const mutations = {
+    setFilter(state, filter) {
+        state.filter = filter
+    },
+    setHistoryCount(state, count) {
+        state.historyCount = count
+    },
     setPlayer(state, player) {
         state.player = player
     },
@@ -110,7 +138,7 @@ const mutations = {
             state.currentPlaying = state.playlist.shift() || undefined
             return
         }
-        if(state.playmode == "repeat"){
+        if (state.playmode == "repeat") {
             return
         }
         if (state.playmode == 'random') {
@@ -233,8 +261,11 @@ const mutations = {
     setMode(state, mode) {
         state.playmode = mode
     },
-    clearPlaylist(state){
+    clearPlaylist(state) {
         state.playlist = []
+    },
+    deletePlaylist(state, index) {
+        state.playlist.splice(index, 1)
     }
 }
 

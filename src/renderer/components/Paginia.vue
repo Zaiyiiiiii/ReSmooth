@@ -31,7 +31,7 @@
         /* margin-right: 1.6px; */
         height: 11px;
         flex-shrink: 0;
-        transition: all 0.5s;
+        transition: all 0.3s;
     }
     .paginia-line > div {
         background: #000;

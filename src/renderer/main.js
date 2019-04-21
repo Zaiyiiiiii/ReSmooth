@@ -36,6 +36,10 @@ let fonts = [
         url: "url('/static/fonts/SourceHanSansSC-Regular.otf')"
     },
     {
+        name: "思源黑体-瘦",
+        url: "url('/static/fonts/SourceHanSansSC-Normal.otf')"
+    },
+    {
         name: "FZPingXianYaSong",
         url: "url('/static/fonts/FZPingXYSJW.TTF')"
     },

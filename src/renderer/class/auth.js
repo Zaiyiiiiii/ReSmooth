@@ -24,6 +24,7 @@ class Auth {
     }
     setAuth(platform, token) {
         store.setItem(`auth_${platform}`, token)
+        return this.getAuth()
     }
 }
 

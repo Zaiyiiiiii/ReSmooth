@@ -10,8 +10,13 @@ export class Salad {
             }
         }
     }
-    updateAuth() {
-
+    updateAuth(auth) {
+        this.auth = auth
+        for (let item in auth) {
+            if (!auth[item]) {
+                delete auth[item]
+            }
+        }
     }
     async login(platform, user, pass) {
         if (platform == "netease") {
@@ -28,5 +33,8 @@ export class Salad {
         if(song.platform == "netease"){
             return netease.getSongUrl(song.id,this.auth["netease"])
         }
+    }
+    async search(text){
+        return await netease.searchForSongs(text,this.auth["netease"])
     }
 }

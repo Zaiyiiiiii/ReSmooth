@@ -45,23 +45,28 @@
             class="record-list"
             ref="list"
         >
-            <!-- <div
-                class="record-list-item"
-                v-for="(item,index) in $store.state.playing.playlist"
+            <div
+                v-if="showAllHistory == false"
+                style="text-align:center;width:100%;font-size:12px;color:#ccc;cursor:pointer"
+                @click="showAllHistory = true"
+            >显示所有历史</div>
+            <div
+                class="record-list-item record-list-history"
+                v-for="item in showAllHistory?history:history.slice(-7,-1)"
                 :key="item.id"
             >
-                <span></span>
+                <span>{{item.time.getFullYear()+"."+item.time.getMonth()+"."+item.time.getDate()+" "+item.time.getHours()+":"+item.time.getMinutes()+":"+item.time.getSeconds()}}</span>
                 <span class="record-list-title">
-                    {{item.name}}</span>
-            </div> -->
+                    {{item.song.name}}</span>
+            </div>
             <div
                 ref="current"
-                v-if="$store.state.playing.currentPlaying"
+                v-if="currentPlaying"
                 class="record-list-item record-current"
             >
                 <span class="record-list-info">正在播放</span>
                 <span class="record-list-title">
-                    {{$store.state.playing.currentPlaying.name}}
+                    {{currentPlaying.name}}
                 </span>
             </div>
             <div
@@ -69,7 +74,10 @@
                 v-for="(item,index) in $store.state.playing.playlist"
                 :key="index"
             >
-                <span></span>
+                <span
+                    class="record-list-delete"
+                    @click="deletePlaylist(index)"
+                >×</span>
                 <span class="record-list-title">
                     {{item.name}}</span>
             </div>
@@ -112,6 +120,7 @@
         color: #fff;
         display: flex;
         align-items: center;
+        z-index: 1;
     }
     .record-mode {
         font-family: "RopaSans";
@@ -141,9 +150,6 @@
     }
     .record-mode:hover > .record-tip {
         opacity: 1;
-    }
-    .record-tools:hover {
-        box-shadow: rgba(180, 180, 180, 1) 0 2px 5px 0;
     }
     .record-list {
         height: 100%;
@@ -176,6 +182,19 @@
         align-items: center;
         overflow: hidden;
     }
+    .record-list-delete {
+        font-size: 26px;
+        opacity: 0;
+        transition: all 0.3s;
+        transform: scaleX(1.15);
+        cursor: pointer;
+    }
+    .record-list-item:hover > .record-list-delete {
+        opacity: 1;
+    }
+    .record-list-history {
+        color: #ccc;
+    }
     .record-list-title {
         max-width: 12em;
         text-overflow: ellipsis;
@@ -188,18 +207,35 @@
 </style>
 <script>
     import Velocity from 'velocity-animate'
+    import { setTimeout } from 'timers';
     export default {
         beforeMount() {
             this.currentMode = this.modes.findIndex(item => { return item.id == this.$store.state.playing.playmode })
+            this.getHistory()
+        },
+        mounted() {
+            this.jumpToCurrent()
+        },
+        computed: {
+            currentPlaying() {
+                return this.$store.state.playing.currentPlaying
+            },
+            historyCount() {
+                return this.$store.state.playing.historyCount
+            }
         },
         watch: {
             currentMode(value) {
                 this.$store.commit("playing/setMode", this.modes[value].id)
+            },
+            historyCount() {
+                this.getHistory()
             }
         },
         data() {
             return {
                 currentMode: undefined,
+                history: [],
                 modes: [
                     {
                         name: "Rand",
@@ -216,10 +252,15 @@
                         text: "单曲",
                         id: "repeat"
                     }
-                ]
+                ],
+                showAllHistory: false
             }
         },
         methods: {
+            async getHistory() {
+                this.history = await this.$store.dispatch('playing/getHistory')
+                return this.history
+            },
             changeMode() {
                 if (this.currentMode >= (this.modes.length - 1)) {
                     this.currentMode = 0
@@ -229,15 +270,13 @@
                 }
             },
             jumpToCurrent() {
-                let offset = this.$refs.current.getBoundingClientRect()
-                console.log(offset)
-                Velocity(this.$refs.list, {
-                        scrollTop: `${offset.top - 40 * 6}px`
-                    },
-                    {
-                        duration: 300,
-                        easing: "ease",
-                    })
+                this.$nextTick()
+                let offset = this.$refs.current.offsetTop
+                this.$refs.list.scrollTo({ left: 0, top: (offset - 40*4), behavior: "smooth" })
+            },
+            deletePlaylist(index) {
+                console.log(index)
+                this.$store.commit('playing/deletePlaylist', index)
             }
         }
     }   

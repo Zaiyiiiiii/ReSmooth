@@ -35,6 +35,7 @@
 </template>
 <script>
     import auth from "@/class/auth"
+    import { Salad } from "@/class/SaladAPI/Salad"
     export default {
         data() {
             return {
@@ -68,8 +69,12 @@
                     console.error(err)
                     return
                 }
-                auth.setAuth(this.currentPlatform, token)
-                this.$router.push("/player")
+                auth.setAuth(this.currentPlatform, token).then(
+                    async () => {
+                        this.$store.state.salad = new Salad(await auth.getAuth())
+                        this.$router.push("/player")
+                    }
+                )
             }
         }
     }
@@ -82,8 +87,8 @@
         padding-top: 180px;
         color: #000;
         /* background-color: red;
-                                -webkit-background-clip: text;
-                                -webkit-text-fill-color: transparent; */
+                                        -webkit-background-clip: text;
+                                        -webkit-text-fill-color: transparent; */
     }
     .login-form {
         -webkit-app-region: no-drag;
