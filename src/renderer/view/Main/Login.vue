@@ -117,7 +117,7 @@
         opacity: 0.1;
     }
     .login-form-platforms {
-        margin-top: 10px;
+        margin-top: 35px;
         display: flex;
         justify-content: center;
         align-items: center;

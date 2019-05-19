@@ -85,13 +85,17 @@
                     :style="{ right:((tabIndex>=0)?((3-tabIndex)*30+8):-100)+'px' }"
                 ></div>
                 <input
-                    type="text"
+                    type="search"
                     class="player-search"
                     v-model="filter"
-                    placeholder="⚲"
+                    required
+                    placeholder="搜索"
+                    @invalid.prevent="()=>{}"
+                    title=" "
+                    @input="setInputWidth"
                     @keydown.enter="$router.push(`/player/search?t=${$event.target.value}`);$store.commit('playing/setFilter','')"
                 >
-                <span style="flex:auto"></span>
+                <div style="flex:1 0 auto"></div>
                 <div
                     class="player-tab-item"
                     :class="{'player-tab-current':(item.name==$route.name)}"
@@ -140,19 +144,21 @@
     .player-bar {
         right: 0;
         top: 0;
-        width: 50px;
+        min-width: 50px;
         height: 100%;
         flex-shrink: 0;
         padding-top: 30px;
-        display: flex;
+        display: inline-flex;
         flex-direction: column;
         position: relative;
         -webkit-app-region: no-drag;
-        position: relative;
         /* background: rgba(128, 128, 255, 0.5) */
     }
     .player-search {
-        width: 30px;
+        width: 42px;
+        max-width: 120px;
+        min-width: 42px;
+        flex-grow: 0;
         -webkit-app-region: no-drag;
         border: none;
         color: #ccc;
@@ -175,15 +181,39 @@
     }
     .player-search::placeholder {
         color: currentColor;
-        font-size: 20px;
-        transform: translateY(2px) rotateZ(-45deg);
+        /* font-size: 20px; */
+        /* transform: translateY(2px) rotateZ(-45deg); */
         transform-origin: center;
     }
     .player-search:focus,
     .player-search:hover,
     .player-search:not(:placeholder-shown) {
         flex: 10 0 auto;
+        min-width: 0;
         color: #000;
+    }
+    .player-search::-webkit-search-cancel-button {
+        -webkit-appearance: none;
+        display: block;
+        width: 15px;
+        height: 15px;
+        background: url("/static/close.svg") center/cover no-repeat;
+    }
+    .player-search:placeholder-shown::-webkit-search-cancel-button,
+    .player-search:not(:focus)::-webkit-search-cancel-button {
+        display: none !important;
+    }
+    .player-search:valid {
+        flex-grow: 0;
+        flex-shrink: 1 !important;
+        display: inline-block;
+        min-width: initial;
+        background: #000;
+        color: #fff;
+        border-image-source: linear-gradient(transparent, transparent);
+    }
+    .player-search:focus {
+        flex-grow: 10;
     }
     .player-progress {
         width: 3px;
@@ -346,6 +376,7 @@
         -webkit-app-region: no-drag;
         overflow: visible;
         transition: all 0.3s;
+        flex-shrink: 0;
     }
     .player-tab-line {
         position: absolute;
@@ -395,6 +426,21 @@
             },
             seekProgress(event) {
                 this.$store.commit("playing/seek", event.clientY / 500 * this.$store.state.playing.duration)
+            },
+            setInputWidth(event) {
+                let tmp = document.createElement("span")
+                tmp.style.opacity = "0"
+                tmp.style["max-width"] = "120px"
+                tmp.style.border = "1.5px solid currentColor"
+                tmp.style["text-indent"] = "0.5em"
+                tmp.style["font-family"] = "思源黑体-瘦"
+                tmp.style["font-size"] = "12px";
+                tmp.innerHTML = event.target.value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                document.body.appendChild(tmp)
+                const theWidth = tmp.getBoundingClientRect().width
+                document.body.removeChild(tmp)
+                console.log(theWidth)
+                event.target.style.width = theWidth + 10 + "px"
             }
         },
         filters: {

@@ -134,7 +134,7 @@
     .record-mode:active {
         text-shadow: #fff 0 0 5px;
     }
-    .record-mode span {
+    .record-mode > span {
         transition: all 0.2s;
     }
     .record-tip {
@@ -272,7 +272,7 @@
             jumpToCurrent() {
                 this.$nextTick()
                 let offset = this.$refs.current.offsetTop
-                this.$refs.list.scrollTo({ left: 0, top: (offset - 40*4), behavior: "smooth" })
+                this.$refs.list.scrollTo({ left: 0, top: (offset - 40 * 4), behavior: "smooth" })
             },
             deletePlaylist(index) {
                 console.log(index)

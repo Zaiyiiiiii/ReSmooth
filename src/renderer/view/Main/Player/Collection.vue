@@ -74,21 +74,29 @@
                 ></paginia>
             </div>
         </transition-group>
-        <div
-            class="collection-playlist"
-            v-if="showPlaylists"
-            @click="showPlaylists = !showPlaylists"
-        >
+        <transition name="bottom-fade">
             <div
-                :class="{'collection-playlist-current':item.id==currentPlaylistId}"
-                class="collection-playlist-item"
-                v-for="item in playlists"
-                :key="item.id"
-                @click="currentPlaylistId = item.id"
+                class="collection-playlist"
+                v-if="showPlaylists"
+                @click="showPlaylists = !showPlaylists"
             >
-                {{item.name}}
+                <div class="collection-playlist-items">
+                    <div
+                        :class="{'collection-playlist-current':item.id==currentPlaylistId}"
+                        class="collection-playlist-item"
+                        v-for="item in playlists"
+                        :key="item.id"
+                        @click="currentPlaylistId = item.id"
+                        :style="{backgroundImage:`${item.id==currentPlaylistId?'linear-gradient(to right,rgba(255,255,255,0.8),rgba(255,255,255,0.8))':'linear-gradient(to right,rgba(25,25,25,0.8),rgba(25,25,25,0.8))'},url(${item.coverImgUrl})`}"
+                    >
+                        {{item.name}}
+                    </div>
+                </div>
+                <div class="collection-playlist-buttons">
+                    ×
+                </div>
             </div>
-        </div>
+        </transition>
     </div>
 </template>
 <style>
@@ -112,6 +120,17 @@
         opacity: 0;
         transform: translateX(10px);
     }
+
+    .bottom-fade-enter-active,
+    .bottom-fade-leave-active {
+        transition: all 0.2s;
+    }
+    .bottom-fade-enter,
+    .bottom-fade-leave-to {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
     .collection {
         display: flex;
         width: 100%;
@@ -239,28 +258,62 @@
         flex-grow: 0;
     }
     .collection-playlist {
-        background: rgba(255,255,255,0.95);
+        background: rgba(255, 255, 255, 0.95);
         position: absolute;
         bottom: 0;
         left: 0;
         height: 300px;
         width: 100%;
         -webkit-app-region: no-drag;
-        padding: 1em;
+        padding: 0 0;
+        overflow: hidden;
+    }
+    .collection-playlist-items {
+        height: 100%;
+        overflow-y: auto;
+        padding-bottom: 100px;
+    }
+    .collection-playlist-items::-webkit-scrollbar {
+        display: none;
     }
     .collection-playlist-item {
         font-size: 12px;
-        /* font-family: "FZCuJinLJW"; */
+        font-family: "思源宋体";
+        text-align: center;
+        line-height: 40px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        margin-bottom: 0.5em;
         cursor: pointer;
         color: #a8a8a8;
-        transition: all 0.2s;
+        transition: all 0.3s;
+        background-position: center 42%;
+        background-size: cover;
+    }
+    .collection-playlist-item:not(.collection-playlist-current):hover {
+        background-position: center 60%;
+        /* transform: scaleX(1.1); */
+        color: #fff;
+        line-height: 50px;
+        font-size: 14px;
     }
     .collection-playlist-current {
+        position: relative;
         color: #000;
+        text-shadow: #a8a8a8 0 0 5px;
+        box-shadow: #a8a8a8 0 -2px 10px 0, #a8a8a8 0 2px 10px 0;
+        transform: scale(1.1);
+    }
+    .collection-playlist-buttons {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 50px;
+        background:rgba(255, 255, 255, 0.85);
+        line-height: 50px;
+        text-indent: 75px;
+        user-select: none;
     }
 </style>
 <script>
@@ -286,10 +339,10 @@
             totalPage() {
                 return Math.ceil(this.filteredPlaylist.length / 15)
             },
-            filteredPlaylist(){
-                return this.currentPlaylist.filter((item)=>{
+            filteredPlaylist() {
+                return this.currentPlaylist.filter((item) => {
                     let filter = this.$store.state.playing.filter.toLowerCase()
-                    return item.name.toLowerCase().indexOf(filter)!=-1
+                    return item.name.toLowerCase().indexOf(filter) != -1
                 })
             }
         },
@@ -301,7 +354,7 @@
             currentPage(to, from) {
                 this.pageDirction = (from > to ? "left" : "right")
             },
-            filteredPlaylist(){
+            filteredPlaylist() {
                 this.currentPage = 1
             }
             // currentPlaylistName() {
